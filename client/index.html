@@ -1,0 +1,303 @@
+<html>
+
+<head>
+  <style>
+    body {
+      background-color: darkslategrey;
+      color: rgb(231, 231, 231);
+      font-size: 1.5em;
+    }
+  </style>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"
+    integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossorigin="anonymous">
+  </script>
+  <script>
+    const socket = io('http://localhost:3000');
+
+    var applicationState = {
+      username: '',
+      points: 0,
+      betPoints: 0,
+      userList: [],
+      currentPrompt: '',
+      currentAnswers: [],
+      userBets: []
+    }
+
+    function errorHandler(error) {
+      if (error.errorName) {
+        console.error("ErrorName: " + error.errorname);
+        console.error("ErrorMessage: " + error.message);
+        throw "Error";
+      }
+
+    }
+
+    function updatePage() {
+
+      usernameElement = document.getElementById('loggedInUsername');
+      pointsElement = document.getElementById('loggedInPoints');
+      betPointsElement = document.getElementById('loggedInBetPoints');
+      userListElement = document.getElementById('allUsers');
+      groupLeaderElement = document.getElementById('groupLeader');
+
+      currentPromptElement = document.getElementById('currentPrompt');
+      currentAnswersElement = document.getElementById('currentAnswers');
+
+      currentUserBetsElement = document.getElementById('currentUserBets');
+
+
+      usernameElement.innerHTML = applicationState.username;
+      pointsElement.innerHTML = applicationState.points;
+      betPointsElement.innerHTML = applicationState.betPoints;
+
+      currentPrompt.innerHTML = applicationState.currentPrompt
+
+
+
+      if (applicationState.userList != undefined) {
+        userListElement.innerHTML = applicationState.userList.map(user => " Name:" + user.username + " Points: " + user
+          .points + " BetPoints: " + user.betPoints).join(' || ');
+
+        console.log("Group Leader");
+        console.log(applicationState.userList);
+        const groupLeader = applicationState.userList.find(user => user.groupLeader === true)
+        if (groupLeader != undefined && groupLeader.username != '') {
+          groupLeaderElement.innerHTML = groupLeader.username;
+        }
+
+      }
+
+      if (applicationState.currentAnswers != undefined && applicationState.currentAnswers != null && applicationState
+        .currentAnswers
+        .length > 0) {
+        currentAnswers.innerHTML = applicationState.currentAnswers.map(answer => "ID: " + answer.id + " Text: " + answer
+          .text).join(' || ');
+      }
+
+      if (applicationState.userBets != undefined && applicationState.userBets != null && applicationState.userBets
+        .length > 0) {
+        const betPointsParsed = applicationState.userBets.map(userBet => "Username: " + userBet.userName + " " +
+          " BetAmount: " + userBet.betAmount + " ID: " + userBet.answerId).join(' || ');
+
+        currentUserBetsElement.innerHTML = betPointsParsed;
+      }
+
+    }
+
+    function sendBetPrompt() {
+      const inputBetPromptElement = document.getElementById('inputBetPrompt');
+      const inputBetPromptAnswersElement = document.getElementById('inputBetPromptAnswers');
+
+      const betPrompt = {
+        prompt: inputBetPromptElement.value,
+        answers: inputBetPromptAnswersElement.value.split(',')
+      }
+
+      socket.emit('sendBetPromptClientToServer', betPrompt, function (response) {
+        errorHandler(response)
+      });
+    }
+
+    function sendBet(betValue) {
+
+      answerId = document.getElementById('answerId').value;
+
+
+      bet = {
+        username: applicationState.username,
+        betAmount: betValue,
+        answerId: parseInt(answerId)
+      }
+
+      socket.emit('betClientToServer', bet, response => {
+        errorHandler(response);
+
+        applicationState.betPoints = response.betPoints;
+
+        updatePage();
+      })
+
+    }
+
+    function sendLogin() {
+
+      username = document.getElementById('username');
+      password = document.getElementById('password');
+
+      login = {
+        'username': username.value,
+        'password': password.value
+      }
+
+      socket.emit('loginClientToServer', login, response => {
+        errorHandler(response);
+
+
+        applicationState.username = response.username;
+        applicationState.points = response.points;
+        applicationState.betPoints = response.currentBet.betPoints;
+
+        updatePage();
+      })
+
+    }
+
+    function sendAllUsers() {
+      socket.emit('allUsersClientToServer', null, response => {
+        errorHandler(response);
+      })
+    }
+
+    function sendClaimGroupLeader() {
+
+      if (applicationState.username != '') {
+        socket.emit('claimGroupLeaderClientToServer', applicationState.username, response => {
+          errorHandler(response);
+        })
+      }
+
+    }
+
+
+    socket.on('betPromptServerToClient', function (response) {
+      errorHandler(response);
+
+      applicationState.currentPrompt = response.prompt;
+      applicationState.currentAnswers = response.answers;
+
+      updatePage();
+    })
+
+    socket.on('currentPromptStateServerToClient', function (response) {
+      errorHandler(response)
+
+      applicationState.userBets = response.userBets;
+
+      updatePage();
+    })
+
+    socket.on('groupLeaderServerToClient', function (response) {
+      errorHandler(response);
+
+      updatePage();
+    })
+
+    socket.on('allUsersServerToClient', function (response) {
+      errorHandler(response);
+
+
+      console.log(response);
+      applicationState.userList = response;
+
+      updatePage();
+    })
+
+    socket.on('connect', function (data) {
+      sendAllUsers();
+    });
+
+    socket.on('events', function (data) {
+      console.log('event', data);
+    });
+
+    socket.on('exception', function (data) {
+      console.log('event', data);
+    });
+
+    socket.on('disconnect', function () {
+      console.log('Disconnected');
+      document.location.reload(true)
+    });
+
+
+    // socket.emit('messageClientToServer', Date());
+  </script>
+</head>
+
+<body>
+
+  Username: <input type="text" id="username" value="testUser">
+  Password: <input type="password" id="password" value="testPassword">
+  <button onclick="sendLogin()">Connect</button>
+
+  <hr>
+
+  <div>
+    LoggedInUser
+    Username: <div id="loggedInUsername"></div>
+    Points: <div id="loggedInPoints"></div>
+    BetPoints: <div id="loggedInBetPoints"></div>
+  </div>
+
+  <hr>
+
+  AllUser
+  <div id="allUsers"></div>
+
+  <hr>
+
+  <hr>
+  <div>
+    Group Leader:
+    <div id="groupLeader"></div>
+
+    <button onclick="sendClaimGroupLeader()">Claim Group Leader</button>
+  </div>
+  <hr>
+
+  <div>
+    Current Prompt:
+    <div id="currentPrompt"> </div>
+
+
+    Current Answers:
+    <div id="currentAnswers"></div>
+
+    Change Points
+    AnswerID: <input id="answerId" value="0">
+    <button onclick="sendBet(100)">Add 100</button>
+    <button onclick="sendBet(-100)">Remove 100</button>
+  </div>
+  <hr>
+
+  <hr>
+  Create Question:
+  <input id="inputBetPrompt" value="Wer gewinnt">
+  <br>
+  <br>
+  Comma Seperated:
+  <input id="inputBetPromptAnswers" value="antwort1,antwort2">
+  <br>
+  <button onclick="sendBetPrompt()">Send Prompt</button>
+  <hr>
+
+  <hr>
+  All Users:
+  <div id="currentUserBets"></div>
+  <hr>
+
+  <hr>
+  Finish Prompt:
+  <button>Wetten schließen</button>
+
+  <hr>
+  Right Answer:
+  AnswerId: <input value="0">
+  <button>Send</button>
+  <button>Reset // Invalid Bet</button>
+
+  <hr>
+  <!-- <button onclick="sendIdentity()">Send</button>
+  <p id="ws-field"></p> -->
+</body>
+
+</html>
+
+<!-- 
+
+  Current Prompt bekommt einen Locked State
+
+  Nachdem Locked == true -> Richtige antwort eingeben. -> berechnen -> group leader resetten
+
+ -->
