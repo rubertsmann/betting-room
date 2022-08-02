@@ -20,16 +20,46 @@ export interface UserState {
     // betPoints: number,
     groupLeader: boolean
 }
-
+export interface GameState {
+    currentPrompt: BetPromptCurrent
+}
 export interface BetPromptRequest {
     prompt: string,
     answers: string[]
 }
 
+export interface CorrectAnswerRequest {
+    promptId: string,
+    answerId: string
+}
+
 export interface BetPromptResponse {
+    prompt: string,
+    answers: BetPrompAnswerResponse[],
+    userBets?: UserBet[]
+}
+
+export interface BetPromptCurrent {
+    prompt: string,
+    answers: BetPrompAnswerResponse[],
+    userBets?: UserBet[]
+}
+
+export interface BetPromptHistoryResponse {
     id: number,
     prompt: string,
     answers: BetPrompAnswerResponse[],
+    correctAnswerId?: number,
+    invalidBet: boolean,
+    userBets?: UserBet[]
+}
+
+export interface BetPromptHistory {
+    id: number,
+    prompt: string,
+    answers: BetPrompAnswerResponse[],
+    correctAnswerId?: number,
+    invalidBet: boolean,
     userBets?: UserBet[]
 }
 

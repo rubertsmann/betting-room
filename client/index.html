@@ -73,6 +73,8 @@
         .length > 0) {
         currentAnswers.innerHTML = applicationState.currentAnswers.map(answer => "ID: " + answer.id + " Text: " + answer
           .text).join(' || ');
+      } else if (applicationState.currentAnswers.length == 0) {
+        currentAnswers.innerHTML = ''
       }
 
       if (applicationState.userBets != undefined && applicationState.userBets != null && applicationState.userBets
@@ -83,6 +85,26 @@
         currentUserBetsElement.innerHTML = betPointsParsed;
       }
 
+    }
+
+    function closeCurrentBetPrompt() {
+      var invalidBet = false
+      socket.emit('closeBetsClientToServer', invalidBet, function (response) {
+        errorHandler(response)
+      });
+    }
+
+    function sendBetCorrectAnswer() {
+      answerIdInput = document.getElementById('betCorrectAnswerId').value;
+      promptIdInput = document.getElementById('betCorrectPromptId').value;
+      correctAnswer = {
+        answerId: answerIdInput,
+        promptId: promptIdInput
+      }
+
+      socket.emit('betCorrectAnswerIdClientToServer', correctAnswer, function (response) {
+        errorHandler(response)
+      });
     }
 
     function sendBetPrompt() {
@@ -159,12 +181,21 @@
 
     }
 
+    function setCurrentPrompt(currentPromptFromServer) {
+      if (currentPromptFromServer == null) {
+        applicationState.currentPrompt = ''
+        applicationState.currentAnswers = []
+      } else {
+        applicationState.currentPrompt = currentPromptFromServer.prompt;
+        applicationState.currentAnswers = currentPromptFromServer.answers;
+      }
+
+    }
 
     socket.on('betPromptServerToClient', function (response) {
       errorHandler(response);
 
-      applicationState.currentPrompt = response.prompt;
-      applicationState.currentAnswers = response.answers;
+      setCurrentPrompt(response)
 
       updatePage();
     })
@@ -179,6 +210,15 @@
 
     socket.on('groupLeaderServerToClient', function (response) {
       errorHandler(response);
+
+      updatePage();
+    })
+
+    socket.on('gameStateServerToClient', function (response) {
+      errorHandler(response);
+
+      setCurrentPrompt(response.currentPrompt)
+      // applicationState.currentPrompt = response.currentPrompt
 
       updatePage();
     })
@@ -242,8 +282,21 @@
     Group Leader:
     <div id="groupLeader"></div>
 
-    <button onclick="sendClaimGroupLeader()">Claim Group Leader</button>
+    <button onclick="sendClaimGroupLeader()">sendClaimGroupLeader() Gruppen Leiter werden</button>
   </div>
+  <hr>
+
+
+
+  <hr>
+  Create Question:
+  <input id="inputBetPrompt" value="Wer gewinnt">
+  <br>
+  <br>
+  Comma Seperated:
+  <input id="inputBetPromptAnswers" value="antwort1,antwort2">
+  <br>
+  <button onclick="sendBetPrompt()">sendBetPrompt()</button>
   <hr>
 
   <div>
@@ -256,20 +309,9 @@
 
     Change Points
     AnswerID: <input id="answerId" value="0">
-    <button onclick="sendBet(100)">Add 100</button>
-    <button onclick="sendBet(-100)">Remove 100</button>
+    <button onclick="sendBet(100)">sendBet(100)</button>
+    <button onclick="sendBet(-100)">sendBet(-100)</button>
   </div>
-  <hr>
-
-  <hr>
-  Create Question:
-  <input id="inputBetPrompt" value="Wer gewinnt">
-  <br>
-  <br>
-  Comma Seperated:
-  <input id="inputBetPromptAnswers" value="antwort1,antwort2">
-  <br>
-  <button onclick="sendBetPrompt()">Send Prompt</button>
   <hr>
 
   <hr>
@@ -279,12 +321,14 @@
 
   <hr>
   Finish Prompt:
-  <button>Wetten schließen</button>
+  <button onClick="closeCurrentBetPrompt()">closeCurrentBetPrompt() Wetten schließen</button>
+
 
   <hr>
-  Right Answer:
-  AnswerId: <input value="0">
-  <button>Send</button>
+  Right Answer: <br>
+  AnswerId: <input id="betCorrectAnswerId" value="0">
+  PromptId: <input id="betCorrectPromptId" value="0">
+  <button onClick="sendBetCorrectAnswer()">sendBetCorrectAnswer() Send</button>
   <button>Reset // Invalid Bet</button>
 
   <hr>

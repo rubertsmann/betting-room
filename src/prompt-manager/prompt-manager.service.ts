@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { BetPromptRequest, BetPromptResponse, BetRequest, UserBet } from 'src/models/interface.collection';
+import { BetPromptCurrent, BetPromptHistory, BetPromptHistoryResponse, BetPromptRequest, BetPromptResponse, BetRequest, UserBet } from 'src/models/interface.collection';
 import { UsermanagerService } from 'src/usermanager/usermanager.service';
 
 @Injectable()
 export class PromptManagerService {
-    getCurrentPromptState() {
-        return this.promptCurrent;
-    }
 
     constructor(private usermanagerService: UsermanagerService) { }
 
@@ -47,6 +44,52 @@ export class PromptManagerService {
         })
     }
 
+    setCorrectAnswerForPrompt(promptId: number, answerId: number) {
+        const prompt = this.promptHistory.find(prompt => prompt.id === promptId)
+
+        if (prompt === null || prompt === undefined) {
+            throw "Bet Prompt Not Found"
+        }
+        const answer = prompt.answers.find(answer => answer.id === answerId)
+
+        if (answer === null || answer === undefined) {
+            throw "Bet Answer Not Found"
+        }
+        prompt.correctAnswerId = answerId;
+
+        this.calculateAndSetPoints(prompt);
+    }
+
+    calculateAndSetPoints(prompt: BetPromptHistory) {
+        let betSum = 0;
+
+        prompt.userBets.forEach(userBet => betSum += userBet.betAmount)
+
+        const winnerUsers: UserBet[] = prompt.userBets.filter(userBet => userBet.answerId != prompt.correctAnswerId)
+        const loserUsers: UserBet[] = prompt.userBets.filter(userBet => userBet.answerId == prompt.correctAnswerId)
+
+        if (betSum <= 0) {
+            throw "Incorrect Bets or No One Bet"
+        }
+
+        if (winnerUsers.length != 0) {
+            const eachUserAmount = betSum / winnerUsers.length
+            winnerUsers.forEach(user => {
+                this.usermanagerService.updateUserBetPoints(user.userName, eachUserAmount)
+            })
+        }
+
+        if (loserUsers.length != 0) {
+            loserUsers.forEach(user => {
+                this.usermanagerService.updateUserBetPoints(user.userName, -user.betAmount)
+            })
+        }
+
+    }
+
+    getCurrentPromptState() {
+        return this.promptCurrent;
+    }
 
 
     // const userBet = this.promptManagerService.saveOrGetUserBet(userName);
@@ -67,8 +110,8 @@ export class PromptManagerService {
     // return user;
 
 
-    private promptHistory: BetPromptResponse[];
-    private promptCurrent: BetPromptResponse = null;
+    private promptHistory: BetPromptHistory[] = [];
+    private promptCurrent: BetPromptCurrent = null;
 
     getCurrentPrompt() {
         return this.promptCurrent;
@@ -83,7 +126,6 @@ export class PromptManagerService {
         // @ToDo replace with correctly mapped input prompt
 
         this.promptCurrent = {
-            id: 0,
             prompt: "Is cedric gay",
             answers: [
                 {
@@ -98,7 +140,39 @@ export class PromptManagerService {
             userBets: []
         };
 
-        return this.promptCurrent;
+        const promptResponse: BetPromptResponse = this.promptCurrent
 
+        return promptResponse;
+
+    }
+
+    closeCurrentBetPrompt(invalidBet: boolean) {
+
+        if (this.promptCurrent == null) {
+            throw "No Prompt currently Open"
+        }
+        const currentPrompt = this.promptCurrent;
+        console.log(currentPrompt);
+        const promptHistoryEntity: BetPromptHistoryResponse = {
+            ...currentPrompt,
+            id: this.getNewPromptId(),
+            invalidBet
+        }
+
+        this.promptCurrent = null;
+        this.promptHistory.push(promptHistoryEntity);
+    }
+
+    getNewPromptId(): number {
+        let promptId = 0;
+        if (this.promptHistory != undefined) {
+            this.promptHistory.forEach(singlePrompt => {
+                if (singlePrompt.id > promptId)
+                    promptId = singlePrompt.id
+            })
+        }
+
+
+        return promptId++;
     }
 }

@@ -17,6 +17,11 @@ export class UsermanagerService {
     }
 
 
+    updateUserBetPoints(userName: string, points: number) {
+        const user = this.users.find(user => user.username === userName);
+        user.points += points;
+    }
+
     updateGroupLeader(userName: string) {
         const currentGroupLeader = this.users.find(user => user.groupLeader === true);
 

@@ -12,7 +12,8 @@ import { Server } from 'socket.io';
 import { PromptManagerService as PromptManagerService } from 'src/prompt-manager/prompt-manager.service';
 import { UsermanagerService } from 'src/usermanager/usermanager.service';
 // import { instrument } from 'socket.io/admin-ui';
-import { BetPromptRequest, BetPromptResponse, BetRequest, Error, LoginRequest, UserState } from 'src/models/interface.collection';
+import { BetPromptRequest, BetPromptResponse, BetRequest, CorrectAnswerRequest, Error, GameState, LoginRequest, UserState } from 'src/models/interface.collection';
+import { IsCurrency } from 'class-validator';
 
 @WebSocketGateway({
   cors: {
@@ -30,6 +31,7 @@ export class EventsGateway {
 
   @SubscribeMessage('connect')
   onConnect(@MessageBody() data: any) {
+
     return true;
   }
 
@@ -43,7 +45,8 @@ export class EventsGateway {
 
     if (user.password == data.password) {
 
-      this.getAllUserState();
+      this.broadcastAllUserStateForClients();
+      this.broadcastGameStateForClients();
 
       return user
     } else {
@@ -77,7 +80,7 @@ export class EventsGateway {
   claimGroupLeaderClientToServer(@MessageBody() userName: string) {
     try {
       this.usermanagerService.updateGroupLeader(userName);
-      this.getAllUserState();
+      this.broadcastAllUserStateForClients();
     } catch (error) {
       return <Error>{
         errorName: 'claimGroupLeaderClientToServer',
@@ -86,9 +89,23 @@ export class EventsGateway {
     }
   }
 
+  @SubscribeMessage('closeBetsClientToServer')
+  closeBetsClientToServer(@MessageBody() invalidBet: boolean) {
+    try {
+
+      this.promptManagerService.closeCurrentBetPrompt(false)
+      this.broadcastGameStateForClients()
+    } catch (error) {
+      return <Error>{
+        errorName: 'closeBetsClientToServer',
+        message: error
+      }
+    }
+  }
+
   @SubscribeMessage('allUsersClientToServer')
   allUsersClientToServer(@MessageBody() data: any) {
-    this.getAllUserState();
+    this.broadcastAllUserStateForClients();
   }
 
 
@@ -110,8 +127,31 @@ export class EventsGateway {
     this.server.emit('betPromptServerToClient', generatedPrompt)
   }
 
+  @SubscribeMessage('betCorrectAnswerIdClientToServer')
+  betCorrectAnswerIdClientToServer(@MessageBody() data: CorrectAnswerRequest) {
+    try {
 
-  getAllUserState() {
+      this.promptManagerService.setCorrectAnswerForPrompt(parseInt(data.promptId), parseInt(data.answerId))
+      this.broadcastGameStateForClients()
+      this.broadcastAllUserStateForClients()
+    }
+    catch (error) {
+      return <Error>{
+        errorName: 'betCorrectAnswerIdClientToServer',
+        message: error
+      }
+    }
+  }
+
+  broadcastGameStateForClients() {
+    const gameState: GameState = {
+      currentPrompt: this.promptManagerService.getCurrentPromptState()
+    }
+
+    this.server.emit('gameStateServerToClient', gameState)
+  }
+
+  broadcastAllUserStateForClients() {
     const allUsers = this.usermanagerService.getAllUser();
 
     const mappedUsers: UserState[] = allUsers.map(user => {
@@ -133,3 +173,8 @@ export class EventsGateway {
     return data;
   }
 }
+
+
+// Fix input question
+// Fix right answer id not returned
+// create frontend in angular
