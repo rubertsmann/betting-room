@@ -12,7 +12,7 @@ import { Server } from 'socket.io';
 // import { instrument } from 'socket.io/admin-ui';
 import { UsermanagerService } from '../usermanager/usermanager.service';
 import { PromptManagerService } from '../prompt-manager/prompt-manager.service';
-import { LoginRequest, Error, BetRequest, BetPromptRequest, CorrectAnswerRequest, GameState, UserState } from '../models/interface.collection';
+import { BetError, BetPromptRequest, BetRequest, CorrectAnswerRequest, GameState, LoginRequest, UserState } from '@new-betting-room/api-interfaces';
 
 @WebSocketGateway({
   cors: {
@@ -49,8 +49,8 @@ export class EventsGateway {
 
       return user
     } else {
-      return <Error>{
-        errorName: 'loginClientToServerError',
+      return <BetError>{
+        errorName: 'loginClientToServerBetBetError',
         message: 'There was an issue when logging in'
       }
     }
@@ -68,7 +68,7 @@ export class EventsGateway {
       return this.promptManagerService.getCurrentPromptState();
 
     } catch (error) {
-      return <Error>{
+      return <BetError>{
         errorName: 'betClientToServer',
         message: error
       }
@@ -81,7 +81,7 @@ export class EventsGateway {
       this.usermanagerService.updateGroupLeader(userName);
       this.broadcastAllUserStateForClients();
     } catch (error) {
-      return <Error>{
+      return <BetError>{
         errorName: 'claimGroupLeaderClientToServer',
         message: error
       }
@@ -95,7 +95,7 @@ export class EventsGateway {
       this.promptManagerService.closeCurrentBetPrompt(false)
       this.broadcastGameStateForClients()
     } catch (error) {
-      return <Error>{
+      return <BetError>{
         errorName: 'closeBetsClientToServer',
         message: error
       }
@@ -113,7 +113,7 @@ export class EventsGateway {
   sendBetPromptClientToServer(@MessageBody() data: BetPromptRequest) {
 
     if (this.promptManagerService.getCurrentPrompt()) {
-      return <Error>{
+      return <BetError>{
         errorName: 'sendBetPromptClientToServer',
         message: "Prompt is open"
       }
@@ -135,7 +135,7 @@ export class EventsGateway {
       this.broadcastAllUserStateForClients()
     }
     catch (error) {
-      return <Error>{
+      return <BetError>{
         errorName: 'betCorrectAnswerIdClientToServer',
         message: error
       }

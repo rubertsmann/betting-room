@@ -10,11 +10,17 @@ import { SocketService } from './services/socket-service.service';
 })
 export class AppComponent {
   hello$ = this.http.get<Message>('/api/hello');
+
+  gameState = this.socketService.onGameStateChange();
+  userState = this.socketService.onUserStateChange();
   constructor(
     private http: HttpClient,
     private socketService: SocketService,
-  ) { }
+  ) {
+    this.sendLogin1();
+   }
 
+  
   public sendLogin1(): void {
     this.socketService.loginClientToServer();
   }

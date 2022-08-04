@@ -1,0 +1,27 @@
+.border-fun {
+    margin: 60px;
+    animation-name: example;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes example {
+    0%   {
+        -webkit-box-shadow: 5px 5px 15px 5px #FF8080, -9px 5px 15px 5px #FFE488, 12px 10px 15px 7px #E488FF, -10px -7px 27px 1px #8E5CFF, 3px 14px 50px -5px rgba(0,0,0,0); 
+        box-shadow: 5px 5px 15px 5px #FF8080, -9px 5px 15px 5px #FFE488, 12px 10px 15px 7px #E488FF, -10px -7px 27px 1px #8E5CFF, 3px 14px 50px -5px rgba(0,0,0,0);
+    }
+    25%  {
+        -webkit-box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px 40px, 5px 5px 15px 5px rgba(0,0,0,0); 
+        box-shadow: #FFF 0 -1px 4px, #ff0 0 -2px 10px, #ff8000 0 -10px 20px, red 0 -18px 40px, 5px 5px 15px 5px rgba(0,0,0,0); }
+    50%  {
+        -webkit-box-shadow: -9px 5px 15px 5px #FFE488, -7px -5px 15px 5px #8CFF85, 12px -5px 15px 5px #80C7FF, -10px -7px 27px 1px #8E5CFF, 5px 5px 15px 5px rgba(0,0,0,0); 
+        box-shadow: -9px 5px 15px 5px #FFE488, -7px -5px 15px 5px #8CFF85, 12px -5px 15px 5px #80C7FF, -10px -7px 27px 1px #8E5CFF, 5px 5px 15px 5px rgba(0,0,0,0);
+       }
+    75%  {
+        -webkit-box-shadow: 0px 0px 0px 8px #000000, 0px 0px 0px 16px #4B4C4B, 0px 0px 0px 24px #828482, 0px 0px 0px 31px #B2B5B2, 0px 0px 0px 39px #DADDDA, 5px 5px 15px 5px rgba(0,0,0,0); 
+        box-shadow: 0px 0px 0px 8px #000000, 0px 0px 0px 16px #4B4C4B, 0px 0px 0px 24px #828482, 0px 0px 0px 31px #B2B5B2, 0px 0px 0px 39px #DADDDA, 5px 5px 15px 5px rgba(0,0,0,0);}
+    100% {
+        -webkit-box-shadow: 5px 5px 15px 5px #FF8080, -9px 5px 15px 5px #FFE488, 12px 10px 15px 7px #E488FF, -10px -7px 27px 1px #8E5CFF, 3px 14px 50px -5px rgba(0,0,0,0); 
+        box-shadow: 5px 5px 15px 5px #FF8080, -9px 5px 15px 5px #FFE488, 12px 10px 15px 7px #E488FF, -10px -7px 27px 1px #8E5CFF, 3px 14px 50px -5px rgba(0,0,0,0);
+     }
+  }

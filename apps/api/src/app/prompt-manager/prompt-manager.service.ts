@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BetPromptCurrent, BetPromptHistory, BetPromptHistoryResponse, BetPromptRequest, BetPromptResponse, BetRequest, UserBet } from '../models/interface.collection';
+import { BetPromptCurrent, BetPromptHistory, BetPromptHistoryResponse, BetPromptRequest, BetPromptResponse, BetRequest, UserBet } from '../../../../../libs/api-interfaces/src/lib/interface.collection';
 import { UsermanagerService } from '../usermanager/usermanager.service';
 
 @Injectable()

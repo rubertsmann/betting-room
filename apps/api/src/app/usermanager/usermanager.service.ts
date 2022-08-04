@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LoginRequest, User } from '../models/interface.collection';
+import { LoginRequest, User } from '../../../../../libs/api-interfaces/src/lib/interface.collection';
 
 @Injectable()
 export class UsermanagerService {

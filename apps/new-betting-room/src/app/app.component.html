@@ -1,3 +1,17 @@
 <h1>Hello!!!</h1>
 
-<button (click)="this.sendLogin1()">Click Me</button>
+<!-- <button (click)="this.sendLogin1()">Click Me</button> -->
+
+<ng-container *ngIf="gameState | async as game">
+
+  <div class="border-fun">
+    <pre>{{game | json}}</pre>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="userState | async as userState">
+  <div class="border-fun">
+    <pre>{{userState | json}}</pre>
+  </div>
+
+</ng-container>
