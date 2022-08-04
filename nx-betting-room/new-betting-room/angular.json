@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+  "version": 2,
+  "projects": {
+    "api": "apps/api",
+    "api-interfaces": "libs/api-interfaces",
+    "new-betting-room": "apps/new-betting-room",
+    "new-betting-room-e2e": "apps/new-betting-room-e2e"
+  }
+}
