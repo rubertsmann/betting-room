@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { BetPromptCurrent, BetPromptHistory, BetPromptHistoryResponse, BetPromptRequest, BetPromptResponse, BetRequest, UserBet } from 'src/models/interface.collection';
-import { UsermanagerService } from 'src/usermanager/usermanager.service';
+import { BetPromptCurrent, BetPromptHistory, BetPromptHistoryResponse, BetPromptRequest, BetPromptResponse, BetRequest, UserBet } from '../models/interface.collection';
+import { UsermanagerService } from '../usermanager/usermanager.service';
 
 @Injectable()
 export class PromptManagerService {

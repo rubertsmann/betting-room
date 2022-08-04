@@ -9,11 +9,10 @@ import {
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server } from 'socket.io';
-import { PromptManagerService as PromptManagerService } from 'src/prompt-manager/prompt-manager.service';
-import { UsermanagerService } from 'src/usermanager/usermanager.service';
 // import { instrument } from 'socket.io/admin-ui';
-import { BetPromptRequest, BetPromptResponse, BetRequest, CorrectAnswerRequest, Error, GameState, LoginRequest, UserState } from 'src/models/interface.collection';
-import { IsCurrency } from 'class-validator';
+import { UsermanagerService } from '../usermanager/usermanager.service';
+import { PromptManagerService } from '../prompt-manager/prompt-manager.service';
+import { LoginRequest, Error, BetRequest, BetPromptRequest, CorrectAnswerRequest, GameState, UserState } from '../models/interface.collection';
 
 @WebSocketGateway({
   cors: {

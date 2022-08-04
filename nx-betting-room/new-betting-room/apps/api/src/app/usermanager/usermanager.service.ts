@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LoginRequest, User } from 'src/models/interface.collection';
-import { PromptManagerService } from 'src/prompt-manager/prompt-manager.service';
-import internal from 'stream';
+import { LoginRequest, User } from '../models/interface.collection';
 
 @Injectable()
 export class UsermanagerService {

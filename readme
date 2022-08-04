@@ -1,7 +1,0 @@
-1. terminal node needs to be install
-2. npm i
-3. npm run start:dev
-4. http:localhost:3000
-
-Simple html+js app with reference to websockets.io.
-Nest.js backend.
